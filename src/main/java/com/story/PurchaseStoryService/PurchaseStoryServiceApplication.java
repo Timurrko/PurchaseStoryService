@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 
 @EnableFeignClients
+@EnableScheduling
 @SpringBootApplication
 public class PurchaseStoryServiceApplication {
 
@@ -31,18 +33,15 @@ public class PurchaseStoryServiceApplication {
 class RestApiDemoController {
 
 	@Autowired
-	CurrencyServiceClient client;
+	DBMaintainer maintainer;
 
-	public RestApiDemoController(CurrencyServiceClient client){
-		this.client = client;
-	}
-	@GetMapping("")
-	Map<String, List<Purchase>> getAllPurchaseStories() {
-		return client.getAllPurchaseStories();
+	public RestApiDemoController(DBMaintainer maintainer){
+		this.maintainer = maintainer;
 	}
 
-	@GetMapping("/{currencyPairName}")
-	List<Purchase> getPurchaseStoryByCurrencyPair(@PathVariable String currencyPairName) {
-		return client.getPurchaseStoryByCurrencyPair(currencyPairName);
+	@GetMapping("/{currencyPairName}:{periodOfTimeInSeconds}")
+	public List<Purchase> getPurchasesByCurrencyPairAndTimePeriod(@PathVariable String currencyPairName, @PathVariable long periodOfTimeInSeconds) {
+		return this.maintainer.getPurchasesByCurrencyPairNameAndTimePeriodInSeconds(currencyPairName, periodOfTimeInSeconds);
 	}
+
 }
